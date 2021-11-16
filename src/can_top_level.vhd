@@ -175,7 +175,7 @@ entity can_top_level is
         -- Interrupt Interface
         -----------------------------------------------------------------------
         -- Interrupt output
-        int         : out std_logic;
+        irq         : out std_logic;
 
         -----------------------------------------------------------------------
         -- CAN Bus Interface
@@ -851,7 +851,7 @@ begin
 
         -- Memory registers Interface
         drv_bus                 => drv_bus,                 -- IN
-        int                     => int,                     -- OUT
+        int                     => irq,                     -- OUT
         int_vector              => int_vector,              -- OUT
         int_mask                => int_mask,                -- OUT
         int_ena                 => int_ena                  -- OUT
