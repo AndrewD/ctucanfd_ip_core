@@ -6,3 +6,4 @@ endif
 ifneq ($(CONFIG_OF),)
 obj-m += ctucanfd_platform.o
 endif
+subdir-ccflags-$(CONFIG_CAN_DEBUG_DEVICES) += -DDEBUG
