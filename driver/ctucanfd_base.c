@@ -505,7 +505,7 @@ static int ctucan_do_set_mode(struct net_device *ndev, enum can_mode mode)
 static inline enum ctucan_txtb_status ctucan_get_tx_status(struct ctucan_priv *priv, u8 buf)
 {
 	u32 tx_status = ctucan_read32(priv, CTUCANFD_TX_STATUS);
-	enum ctucan_txtb_status status = (tx_status >> (buf * 4)) & 0x7;
+	enum ctucan_txtb_status status = (tx_status >> (buf * 4)) & 0xf;
 
 	return status;
 }
@@ -523,7 +523,7 @@ static bool ctucan_is_txt_buf_writable(struct ctucan_priv *priv, u8 buf)
 	enum ctucan_txtb_status buf_status;
 
 	buf_status = ctucan_get_tx_status(priv, buf);
-	if (buf_status == TXT_RDY || buf_status == TXT_TRAN || buf_status == TXT_ABTP)
+	if (buf_status == TXT_RDY || buf_status == TXT_TRAN || buf_status == TXT_ABTP || buf_status == TXT_NOT_EXIST)
 		return false;
 
 	return true;
