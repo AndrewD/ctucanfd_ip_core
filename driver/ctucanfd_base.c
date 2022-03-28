@@ -1413,7 +1413,7 @@ int ctucan_resume(struct device *dev)
 }
 EXPORT_SYMBOL(ctucan_resume);
 
-int ctucan_probe_common(struct device *dev, void __iomem *addr, int irq, unsigned int ntxbufs,
+int ctucan_probe_common(struct device *dev, void __iomem *addr, int irq,
 			unsigned long can_clk_rate, int pm_enable_call,
 			void (*set_drvdata_fnc)(struct device *dev, struct net_device *ndev))
 {
@@ -1421,15 +1421,14 @@ int ctucan_probe_common(struct device *dev, void __iomem *addr, int irq, unsigne
 	struct net_device *ndev;
 	int ret;
 
-	/* Create a CAN device instance */
-	ndev = alloc_candev(sizeof(struct ctucan_priv), ntxbufs);
+	/* Create a CAN device instance for 8 (max) ntxbufs */
+	ndev = alloc_candev(sizeof(struct ctucan_priv), 8);
 	if (!ndev)
 		return -ENOMEM;
 
 	priv = netdev_priv(ndev);
 	spin_lock_init(&priv->tx_lock);
 	INIT_LIST_HEAD(&priv->peers_on_pdev);
-	priv->ntxbufs = ntxbufs;
 	priv->dev = dev;
 	priv->can.bittiming_const = &ctu_can_fd_bit_timing_max;
 	priv->can.data_bittiming_const = &ctu_can_fd_bit_timing_data_max;
@@ -1476,7 +1475,7 @@ int ctucan_probe_common(struct device *dev, void __iomem *addr, int irq, unsigne
 		pm_runtime_enable(dev);
 	ret = pm_runtime_get_sync(dev);
 	if (ret < 0) {
-		netdev_err(ndev, "%s: pm_runtime_get failed(%d)\n",
+		dev_err(dev, "%s: pm_runtime_get failed(%d)\n",
 			   __func__, ret);
 		pm_runtime_put_noidle(priv->dev);
 		goto err_pmdisable;
@@ -1487,11 +1486,14 @@ int ctucan_probe_common(struct device *dev, void __iomem *addr, int irq, unsigne
 		priv->write_reg = ctucan_write32_be;
 		priv->read_reg = ctucan_read32_be;
 		if ((ctucan_read32(priv, CTUCANFD_DEVICE_ID) & 0xFFFF) != CTUCANFD_ID) {
-			netdev_err(ndev, "CTU_CAN_FD signature not found\n");
+			dev_err(dev, "CTU_CAN_FD signature not found\n");
 			ret = -ENODEV;
 			goto err_deviceoff;
 		}
 	}
+
+	priv->ntxbufs = FIELD_GET(REG_TX_COMMAND_TXT_BUFFER_COUNT, ctucan_read32(priv, CTUCANFD_TX_COMMAND));
+	dev_dbg(dev, "txt buffers: %d detected", priv->ntxbufs);
 
 	ret = ctucan_reset(ndev);
 	if (ret < 0)

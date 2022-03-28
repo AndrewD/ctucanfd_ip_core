@@ -61,7 +61,6 @@ static int ctucan_platform_probe(struct platform_device *pdev)
 	struct device	*dev = &pdev->dev;
 	void __iomem *addr;
 	int ret;
-	unsigned int ntxbufs;
 	int irq;
 
 	/* Get the virtual base address for the device */
@@ -79,11 +78,7 @@ static int ctucan_platform_probe(struct platform_device *pdev)
 		goto err;
 	}
 
-	/* Number of tx bufs might be change in HW for future. If so,
-	 * it will be passed as property via device tree
-	 */
-	ntxbufs = 4;
-	ret = ctucan_probe_common(dev, addr, irq, ntxbufs, 0,
+	ret = ctucan_probe_common(dev, addr, irq, 0,
 				  1, ctucan_platform_set_drvdata);
 
 	if (ret < 0)

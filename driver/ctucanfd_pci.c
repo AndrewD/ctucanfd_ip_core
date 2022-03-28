@@ -111,7 +111,6 @@ static int ctucan_pci_probe(struct pci_dev *pdev,
 	u32 cra_a2p_ie;
 	u32 ctucan_id = 0;
 	int ret;
-	unsigned int ntxbufs;
 	unsigned int num_cores = 1;
 	unsigned int core_i = 0;
 	int irq;
@@ -173,8 +172,6 @@ static int ctucan_pci_probe(struct pci_dev *pdev,
 
 	irq = pdev->irq;
 
-	ntxbufs = 4;
-
 	bdata = kzalloc(sizeof(*bdata), GFP_KERNEL);
 	if (!bdata) {
 		ret = -ENOMEM;
@@ -189,7 +186,7 @@ static int ctucan_pci_probe(struct pci_dev *pdev,
 
 	pci_set_drvdata(pdev, bdata);
 
-	ret = ctucan_probe_common(dev, addr, irq, ntxbufs, 100000000,
+	ret = ctucan_probe_common(dev, addr, irq, 100000000,
 				  0, ctucan_pci_set_drvdata);
 	if (ret < 0)
 		goto err_free_board;
@@ -198,7 +195,7 @@ static int ctucan_pci_probe(struct pci_dev *pdev,
 
 	while (pci_use_second && (core_i < num_cores)) {
 		addr += 0x4000;
-		ret = ctucan_probe_common(dev, addr, irq, ntxbufs, 100000000,
+		ret = ctucan_probe_common(dev, addr, irq, 100000000,
 					  0, ctucan_pci_set_drvdata);
 		if (ret < 0) {
 			dev_info(dev, "CTU CAN FD core %d initialization failed\n",

@@ -80,7 +80,7 @@ struct ctucan_priv {
  * Return: 0 on success and failure value on error
  */
 int ctucan_probe_common(struct device *dev, void __iomem *addr,
-			int irq, unsigned int ntxbufs,
+			int irq,
 			unsigned long can_clk_rate,
 			int pm_enable_call,
 			void (*set_drvdata_fnc)(struct device *dev,
