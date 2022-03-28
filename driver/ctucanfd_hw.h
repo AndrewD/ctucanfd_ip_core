@@ -864,7 +864,7 @@ static inline u16 ctucan_hw_get_tran_delay(struct ctucan_hw_priv *priv)
  *                               by CTU CAN FD Core.
  *
  * @priv: Private info
- * Return: Number of received CAN/CAN FD frames.
+ * Return: Number of transmitted CAN/CAN FD frames.
  */
 static inline u32 ctucan_hw_get_tx_frame_ctr(struct ctucan_hw_priv *priv)
 {
