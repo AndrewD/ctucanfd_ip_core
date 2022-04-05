@@ -645,9 +645,13 @@ static netdev_tx_t ctucan_start_xmit(struct sk_buff *skb, struct net_device *nde
 	ok = ctucan_insert_frame(priv, cf, txtb_id, can_is_canfd_skb(skb));
 
 	if (!ok) {
-		netdev_err(ndev, "BUG! TXNF set but cannot insert frame into TXTB! HW Bug?");
+		netdev_err(ndev, "BUG! TXNF set but cannot insert frame into TXB#%x! HW Bug?", txtb_id);
 		kfree_skb(skb);
 		ndev->stats.tx_dropped++;
+		/* Try next TX buffer */
+		spin_lock_irqsave(&priv->tx_lock, flags);
+		priv->txb_head++;
+		spin_unlock_irqrestore(&priv->tx_lock, flags);
 		return NETDEV_TX_OK;
 	}
 
@@ -1094,6 +1098,10 @@ static void ctucan_tx_interrupt(struct net_device *ndev)
 #endif /* < 5.12.0 */
 				stats->tx_dropped++;
 				break;
+			case TXT_NOT_EXIST:
+				/* "HW Bug?"" already reported so just advance tail */
+				priv->txb_tail++;
+				goto clear;
 			default:
 				/* Bug only if the first buffer is not finished, otherwise it is
 				 * pretty much expected.
